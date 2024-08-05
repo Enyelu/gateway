@@ -58,5 +58,28 @@ namespace gateway.api.Utilities.Token.Implementation
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        public async Task<GenericResponse<RefreshTokenToReturnDto>> GenerateRefreshTokenAsync(RefreshTokenRequestDto token, string tenantId, string staffId)
+        {
+            var refreshToken = token.RefreshToken;
+            var userId = token.UserId;
+
+            var user = await _userManager.FindByIdAsync(token.UserId);
+
+            if (user.RefreshToken != refreshToken.ToString() || user.RefereshTokenExpiry <= DateTime.Now)
+            {
+                return GenericResponse<RefreshTokenToReturnDto>.Fail("Invalid request", (int)HttpStatusCode.BadRequest);
+            }
+
+            var result = new RefreshTokenToReturnDto
+            {
+                NewJwtAccessToken = await GenerateTokenAsync(user, tenantId, staffId),
+                NewRefreshToken = Guid.NewGuid(),
+            };
+            user.RefreshToken = result.NewRefreshToken.ToString();
+            user.RefereshTokenExpiry = DateTime.Now.AddDays(3);
+            await _userManager.UpdateAsync(user);
+
+            return GenericResponse<RefreshTokenToReturnDto>.Success("Token Successfully refreshed", result);
+        }
     }
 }

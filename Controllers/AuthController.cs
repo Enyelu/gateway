@@ -1,5 +1,6 @@
 ﻿using gateway.api.Commands;
 using gateway.api.Models.Login;
+using gateway.api.Models.Token;
 using gateway.api.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,22 @@ namespace gateway.api.Controllers
             {
                 Email = model.Email,
                 Password = model.Password,
+            });
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpPost("refresh-token")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<GenericResponse<string>>> RefreshToken([FromBody] RefreshTokenRequestDto model)
+        {
+            _logger.LogInformation($"Refresh token Attempt for {model.UserId} at {DateTime.Now}");
+            var result = await _mediator.Send(new HandleRefreshToken.Command
+            {
+                UserId = model.UserId,
+                RefreshToken = model.RefreshToken
             });
             return StatusCode(result.StatusCode, result);
         }
