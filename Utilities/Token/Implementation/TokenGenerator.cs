@@ -58,37 +58,5 @@ namespace gateway.api.Utilities.Token.Implementation
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<GenericResponse<RefreshTokenToReturnDto>> GenerateRefreshTokenAsync(RefreshTokenRequestDto token, string tenantId, string staffId)
-        {
-            var response = new GenericResponse<RefreshTokenToReturnDto>();
-            var refreshToken = token.RefreshToken;
-            var userId = token.UserId;
-
-            var user = await _userManager.FindByIdAsync(token.UserId);
-
-            if (user.RefreshToken != refreshToken.ToString() || user.RefereshTokenExpiry <= DateTime.Now)
-            {
-                response.Data = null;
-                response.Message = "Invalid request";
-                response.StatusCode = (int)HttpStatusCode.BadRequest;
-                response.Succeeded = false;
-                return response;
-            }
-
-            var result = new RefreshTokenToReturnDto
-            {
-                NewJwtAccessToken = await GenerateTokenAsync(user, tenantId, staffId),
-                NewRefreshToken = Guid.NewGuid(),
-            };
-            user.RefreshToken = result.NewRefreshToken.ToString();
-            user.RefereshTokenExpiry = DateTime.Now.AddDays(3);
-            await _userManager.UpdateAsync(user);
-
-            response.Data = result;
-            response.Message = "Token Successfully refreshed";
-            response.StatusCode = (int)HttpStatusCode.OK;
-            response.Succeeded = true;
-            return response;
-        }
     }
 }
