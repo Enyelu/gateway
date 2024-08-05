@@ -22,16 +22,19 @@ namespace gateway.api.Commands
             private readonly ApplicationContext _context;
             private readonly UserManager<AppUser> _userManager;
             private readonly ITokenGenerator _tokenGenerator;
+            private readonly ILogger<Handler> _logger;
 
-            public Handler(UserManager<AppUser> userManager, ITokenGenerator tokenGenerator, ApplicationContext context)
+            public Handler(UserManager<AppUser> userManager, ITokenGenerator tokenGenerator, ApplicationContext context, ILogger<Handler> logger)
             {
                 _context = context;
                 _userManager = userManager;
                 _tokenGenerator = tokenGenerator;
+                _logger = logger;
             }
 
             public async Task<GenericResponse<LoginResponseDto>> Handle(Command request, CancellationToken cancellationToken)
             {
+                _logger.LogInformation($"Login Attempt for {request.Email} at {DateTime.Now} ===> Validating user credentials");
                 var user = await _userManager.FindByEmailAsync(request.Email);
 
                 if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
@@ -59,6 +62,8 @@ namespace gateway.api.Commands
                 user.RefereshTokenExpiry = DateTime.UtcNow.AddDays(1);
                 user.RefreshToken = result.RefreshToken.ToString();
                 await _userManager.UpdateAsync(user);
+
+                _logger.LogInformation($"Login Attempt for {request.Email} was successful...");
                 return GenericResponse<LoginResponseDto>.Success("Login was successful!", result);
 
             }
