@@ -4,6 +4,7 @@ using gateway.api.Shared;
 using gateway.api.Utilities.Token.Implementation;
 using gateway.api.Utilities.Token.Interface;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +27,14 @@ builder.Services.AddMediatR(m => m.RegisterServicesFromAssemblies(Assembly.GetEx
 
 builder.Services.AddTransient<ITokenGenerator, TokenGenerator>();
 builder.Services.Configure<JWTSettings>(builder.Configuration.GetSection("JWTSettings"));
+
+//Configure logger
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .WriteTo.Seq(context.Configuration["Serilog:WriteTo:0:Args:serverUrl"]));
+
+Log.Information("Application is starting - App Gateway");
 
 // Add YARP services
 builder.Services.AddReverseProxy()

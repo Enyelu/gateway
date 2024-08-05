@@ -22,16 +22,19 @@ namespace gateway.api.Commands
             private readonly ApplicationContext _context;
             private readonly UserManager<AppUser> _userManager;
             private readonly ITokenGenerator _tokenGenerator;
+            private readonly ILogger<Handler> _logger;
 
-            public Handler(UserManager<AppUser> userManager, ITokenGenerator tokenGenerator, ApplicationContext context)
+            public Handler(UserManager<AppUser> userManager, ITokenGenerator tokenGenerator, ApplicationContext context, ILogger<Handler> logger)
             {
                 _context = context;
                 _userManager = userManager;
                 _tokenGenerator = tokenGenerator;
+                _logger = logger;
             }
 
             public async Task<GenericResponse<RefreshTokenToReturnDto>> Handle(Command request, CancellationToken cancellationToken)
             {
+                _logger.LogInformation($"Refresh token Attempt for {request.UserId} at {DateTime.Now} ===> Validating user credentials");
                 var user = await _userManager.FindByIdAsync(request.UserId);
 
                 if (user == null)
@@ -52,8 +55,8 @@ namespace gateway.api.Commands
                     RefreshToken = request.RefreshToken,
                 }, tenantId, staffId);
 
+                _logger.LogInformation($"Refresh token retrieval for {request.UserId} was successful....");
                 return result;
-
             }
         }
     }
