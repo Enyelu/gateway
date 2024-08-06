@@ -10,6 +10,11 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Load application settings
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("yarpsettings.json", optional: false, reloadOnChange: true);
+
 // Add services to the container.
 
 builder.Services.AddControllers();
