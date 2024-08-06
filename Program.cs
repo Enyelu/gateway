@@ -21,12 +21,14 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.ConfigureIdentity();
-builder.Services.ConfigureAuthentication(builder.Configuration);
 
 builder.Services.AddMediatR(m => m.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
 
 builder.Services.AddTransient<ITokenGenerator, TokenGenerator>();
 builder.Services.Configure<JWTSettings>(builder.Configuration.GetSection("JWTSettings"));
+
+builder.Services.ConfigureAuthentication(builder.Configuration);
+builder.Services.AddAuthorization();
 
 //Configure logger
 builder.Host.UseSerilog((context, services, configuration) => configuration
@@ -51,9 +53,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 
 // Use YARP middleware
 app.MapReverseProxy();
