@@ -14,12 +14,14 @@ namespace gateway.api.Utilities.Token.Implementation
 {
     public class TokenGenerator : ITokenGenerator
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly IConfiguration _configuration;
         private readonly JWTSettings _jWTSettings;
+        private readonly IConfiguration _configuration;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public TokenGenerator(IOptions<JWTSettings> options, UserManager<AppUser> userManager, IConfiguration configuration, IWebHostEnvironment env)
+        public TokenGenerator(RoleManager<IdentityRole> roleManager, IOptions<JWTSettings> options, UserManager<AppUser> userManager, IConfiguration configuration, IWebHostEnvironment env)
         {
+            _roleManager = roleManager;
             _userManager = userManager;
             _configuration = configuration;
             _jWTSettings = options.Value;
@@ -35,14 +37,22 @@ namespace gateway.api.Utilities.Token.Implementation
                 new Claim(ClaimTypes.Name, $"{appUser.FirstName} {appUser.LastName}"),
                 new Claim(ClaimTypes.GivenName, appUser.UserName),
                 new Claim("TenantId", tenantId ?? ""),
-                 new Claim("StaffId", staffId ?? ""),
+                new Claim("StaffId", staffId ?? ""),
             };
 
             var roles = await _userManager.GetRolesAsync(appUser);
-
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            foreach (var roleName in roles)
+            {
+                var role = await _roleManager.FindByNameAsync(roleName);
+                if (role != null)
+                {
+                    claims.Add(new Claim("RoleDefinitions", $"{role.Name}:{role.Id}"));
+                }
             }
             
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jWTSettings.SecretKey));
