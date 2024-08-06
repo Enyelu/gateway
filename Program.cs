@@ -1,4 +1,5 @@
 using gateway.api.Extensions;
+using gateway.api.Middlewares;
 using gateway.api.Persistence.Database;
 using gateway.api.Shared;
 using gateway.api.Utilities.Token.Implementation;
@@ -8,6 +9,11 @@ using Serilog;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Load application settings
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("yarpsettings.json", optional: false, reloadOnChange: true);
 
 // Add services to the container.
 
@@ -50,7 +56,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.ConfigureExceptionHandler();
 app.UseHttpsRedirection();
 
 app.UseRouting();
