@@ -1,4 +1,5 @@
 using gateway.api.Extensions;
+using gateway.api.Middlewares;
 using gateway.api.Persistence.Database;
 using gateway.api.Shared;
 using gateway.api.Utilities.Token.Implementation;
@@ -50,7 +51,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.ConfigureExceptionHandler();
 app.UseHttpsRedirection();
 
 app.UseRouting();
