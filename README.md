@@ -2,6 +2,10 @@
 
 This repository contains the code and documentation for API Gateway services. Each microservices (API Gateway, Access Control and User Management ) is hosted in its own repository, and the overall architecture leverages modern technologies and patterns for a scalable and maintainable solution.
 
+![Software Architechture](https://github.com/user-attachments/assets/77f6f568-e9c3-4d02-a953-0b6e30fd005f)
+
+
+
 ## Technologies Used
 
 - **Clean Architecture**: Implements principles of Clean Architecture for separation of concerns and maintainability.
