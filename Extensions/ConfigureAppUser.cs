@@ -8,7 +8,7 @@ namespace gateway.api.Extensions
     {
         public static void ConfigureIdentity(this IServiceCollection services)
         {
-            var builder = services.AddIdentity<AppUser, IdentityRole>(options =>
+            var builder = services.AddIdentity<AppUser, ApplicationRole>(options =>
             {
                 options.User.RequireUniqueEmail = true;
                 options.Password.RequireDigit = true;
