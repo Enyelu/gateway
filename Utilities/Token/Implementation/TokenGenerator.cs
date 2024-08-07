@@ -17,9 +17,9 @@ namespace gateway.api.Utilities.Token.Implementation
         private readonly JWTSettings _jWTSettings;
         private readonly IConfiguration _configuration;
         private readonly UserManager<AppUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public TokenGenerator(RoleManager<IdentityRole> roleManager, IOptions<JWTSettings> options, UserManager<AppUser> userManager, IConfiguration configuration, IWebHostEnvironment env)
+        public TokenGenerator(RoleManager<ApplicationRole> roleManager, IOptions<JWTSettings> options, UserManager<AppUser> userManager, IConfiguration configuration, IWebHostEnvironment env)
         {
             _roleManager = roleManager;
             _userManager = userManager;
