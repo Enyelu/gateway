@@ -33,6 +33,8 @@ builder.Services.AddMediatR(m => m.RegisterServicesFromAssemblies(Assembly.GetEx
 builder.Services.AddTransient<ITokenGenerator, TokenGenerator>();
 builder.Services.Configure<JWTSettings>(builder.Configuration.GetSection("JWTSettings"));
 
+builder.Services.InjectFluentValidations();
+
 builder.Services.ConfigureAuthentication(builder.Configuration);
 builder.Services.AddAuthorization();
 
