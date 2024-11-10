@@ -9,13 +9,15 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
+    # Step 1: Checkout the code
     - name: Check out code
       uses: actions/checkout@v2
 
+    # Step 2: Set up Docker Buildx
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
-    # Unit Testing Step
+    # Step 3: Run Unit Tests
     - name: Run Unit Tests
       run: |
         dotnet test --filter TestCategory=Unit
@@ -23,7 +25,7 @@ jobs:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
         AWS_REGION: us-west-1
 
-    # Integration Testing Step
+    # Step 4: Run Integration Tests
     - name: Run Integration Tests
       run: |
         dotnet test --filter TestCategory=Integration
@@ -31,7 +33,7 @@ jobs:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
         AWS_REGION: us-west-1
 
-    # Build Docker image
+    # Step 5: Log in to Amazon ECR
     - name: Log in to Amazon ECR
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -40,24 +42,34 @@ jobs:
       run: |
         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 767397708304.dkr.ecr.$AWS_REGION.amazonaws.com
 
+    # Step 6: Build and push Docker image
     - name: Build and push Docker image
       run: |
         docker build -t 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest .
         docker push 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
 
-    # Set up Kubeconfig for EKS
-    - name: Set up Kubeconfig for EKS
+    # Step 7: Update Kubeconfig with AWS CLI
+    - name: Update Kubeconfig with AWS CLI
       run: |
         aws eks --region eu-west-1 update-kubeconfig --name doorapp
+        cat $HOME/.kube/config  # Print kubeconfig for debugging purposes
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: eu-west-1
 
+    # Step 8: Set correct Kubernetes context
+    - name: Set correct Kubernetes context
+      run: |
+        kubectl config use-context arn:aws:eks:eu-west-1:767397708304:cluster/doorapp
+      env:
+        KUBECONFIG: $HOME/.kube/config
+
+    # Step 9: Check current Kubernetes context
     - name: Check Kubernetes context
       run: kubectl config current-context
 
-    # Update Kubernetes deployment
+    # Step 10: Update Kubernetes deployment
     - name: Update Kubernetes deployment
       run: |
         kubectl set image deployment/gateway-deployment gateway-container=767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
