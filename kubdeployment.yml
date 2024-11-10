@@ -15,8 +15,12 @@ spec:
       containers:
       - name: door-service-dateway
         image: 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
+        env:
+          - name: ASPNETCORE_ENVIRONMENT
+            value: "Development"
 ---
 apiVersion: v1
 kind: Service
