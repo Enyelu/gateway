@@ -48,7 +48,7 @@ jobs:
       # Set up kubeconfig for EKS
       - name: Set up Kubeconfig for EKS
         run: |
-          aws eks --region eu-west-1 update-kubeconfig --name doorapp
+          aws eks --region eu-west-1 update-kubeconfig --name doorserviceapis
 
       - name: apply kubernates yaml
         run: |
