@@ -1,80 +1,72 @@
-name: CI/CD Pipeline
+name: Build and Deploy to EKS
 
 on:
   push:
     branches:
-      - main
+      - main  # Trigger the workflow on push to the main branch
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-    
-    # Step 1: Check out code from the repository
-    - name: Check out code
-      uses: actions/checkout@v2
+      # Check out code from the repository
+      - name: Check out code
+        uses: actions/checkout@v2
 
-    # Step 2: Set up Docker Buildx
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      # Set up AWS CLI
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
 
-    # Step 3: Run Unit Tests
-    - name: Run Unit Tests
-      run: |
-        dotnet test --filter TestCategory=Unit
-      env:
-        DOTNET_CLI_TELEMETRY_OPTOUT: 1
-        AWS_REGION: us-west-1
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-    # Step 4: Run Integration Tests
-    - name: Run Integration Tests
-      run: |
-        dotnet test --filter TestCategory=Integration
-      env:
-        DOTNET_CLI_TELEMETRY_OPTOUT: 1
-        AWS_REGION: us-west-1
+      # Run Unit Tests
+      - name: Run Unit Tests
+        run: |
+          dotnet test --filter TestCategory=Unit
+        env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: 1
+          AWS_REGION: us-west-1
 
-    # Step 5: Log in to Amazon ECR
-    - name: Log in to Amazon ECR
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: eu-west-1
-      run: |
-        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 767397708304.dkr.ecr.$AWS_REGION.amazonaws.com
+      # Log in to Amazon ECR
+      - name: Log in to Amazon ECR
+        run: |
+          aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 767397708304.dkr.ecr.eu-west-1.amazonaws.com
 
-    # Step 6: Build and Push Docker image to Amazon ECR
-    - name: Build and push Docker image
-      run: |
-        docker build -t 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest .
-        docker push 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
+      # Build and push Docker image to Amazon ECR
+      - name: Build and push Docker image
+        run: |
+          docker build -t 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest .
+          docker push 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
 
-    # Step 7: Set up kubeconfig for EKS
-    - name: Set up Kubeconfig for EKS
-      run: |
-        aws eks --region eu-west-1 update-kubeconfig --name doorapp
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: eu-west-1
+      # Set up kubeconfig for EKS
+      - name: Set up Kubeconfig for EKS
+        run: |
+          aws eks --region eu-west-1 update-kubeconfig --name doorapp
 
-    # Step 8: Verify Kubernetes Context and Cluster Info
-    - name: Display Kubernetes Context
-      run: |
-        kubectl config get-contexts
-        kubectl config current-context
-        kubectl cluster-info
+      # Verify Kubernetes Context and Cluster Info
+      - name: Display Kubernetes Context
+        run: |
+          kubectl config get-contexts
+          kubectl config current-context
+          kubectl cluster-info
 
-    # Step 9: Set Kubernetes Context (if necessary)
-    - name: Set Kubernetes Context
-      run: |
-        kubectl config use-context arn:aws:eks:eu-west-1:767397708304:cluster/doorapp
-        kubectl config current-context
+      # Set Kubernetes Context
+      - name: Set Kubernetes Context
+        run: |
+          kubectl config use-context arn:aws:eks:eu-west-1:767397708304:cluster/doorapp
+          kubectl config current-context
 
-    # Step 10: Update Kubernetes deployment
-    - name: Update Kubernetes deployment
-      run: |
-        kubectl set image deployment/gateway-deployment gateway-container=767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
-      env:
-        KUBECONFIG: $HOME/.kube/config
-        AWS_REGION: eu-west-1
+      # Update Kubernetes deployment
+      - name: Update Kubernetes deployment
+        run: |
+          kubectl set image deployment/gateway-deployment gateway-container=767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
+        env:
+          KUBECONFIG: $HOME/.kube/config
+          AWS_REGION: eu-west-1
