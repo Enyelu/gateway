@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: door-service-dateway
+  name: door-service-gateway
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: door-service-dateway
+      app: door-service-gateway
   template:
     metadata:
       labels:
-        app: door-service-dateway
+        app: door-service-gateway
     spec:
       containers:
-      - name: door-service-dateway
+      - name: door-service-gateway
         image: 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
         imagePullPolicy: Always
         ports:
@@ -24,15 +24,15 @@ spec:
 ---
 apiVersion: v1
 kind: Service
-metadata:
-  name: door-service-gateway
+metadata:door-service-gateway
 spec:
   selector:
     app: door-service-gateway
   ports:
+  name: 
     - protocol: TCP
       port: 80
       targetPort: 8080
-  type: NodePort
+  type: LoadBalancer
 
 
