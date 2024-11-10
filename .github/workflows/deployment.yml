@@ -62,10 +62,10 @@ jobs:
     - name: List Kubernetes Contexts
       run: kubectl config get-contexts
 
-    # Step 9: Set correct Kubernetes context
+    # Step 9: Set Kubernetes Context (use the full ARN context name)
     - name: Set Kubernetes Context
       run: |
-        kubectl config use-context doorapp  # Use the correct context name
+        kubectl config use-context arn:aws:eks:eu-west-1:767397708304:cluster/doorapp
       env:
         KUBECONFIG: $HOME/.kube/config
 
