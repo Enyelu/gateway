@@ -21,7 +21,9 @@ spec:
         env:
           - name: ASPNETCORE_ENVIRONMENT
             value: "Development"
+
 ---
+
 apiVersion: v1
 kind: Service
 metadata: door-service-gateway
