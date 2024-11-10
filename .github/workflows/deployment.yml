@@ -32,7 +32,7 @@ jobs:
           dotnet test --filter TestCategory=Unit
         env:
           DOTNET_CLI_TELEMETRY_OPTOUT: 1
-          AWS_REGION: us-west-1
+          AWS_REGION: eu-west-1
 
       # Log in to Amazon ECR
       - name: Log in to Amazon ECR
