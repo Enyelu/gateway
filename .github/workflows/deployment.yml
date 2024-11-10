@@ -22,6 +22,7 @@ jobs:
         dotnet test --filter TestCategory=Unit
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        AWS_REGION: us-west-1
 
     # Integration Testing Step
     - name: Run Integration Tests
@@ -30,24 +31,26 @@ jobs:
         dotnet test --filter TestCategory=Integration
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        AWS_REGION: us-west-1
 
     # Build Docker image
     - name: Log in to Amazon ECR
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: <region>
+        AWS_REGION: eu-west-1
       run: |
-        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin <account_id>.dkr.ecr.$AWS_REGION.amazonaws.com
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 767397708304.dkr.ecr.$AWS_REGION.amazonaws.com
 
     - name: Build and push Docker image
       run: |
-        docker build -t <account_id>.dkr.ecr.<region>.amazonaws.com/your_service_name:latest .
-        docker push <account_id>.dkr.ecr.<region>.amazonaws.com/your_service_name:latest
+        docker build -t 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest .
+        docker push 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
 
     # Update Kubernetes deployment
     - name: Update Kubernetes deployment
       run: |
-        kubectl set image deployment/your-service your-service=<account_id>.dkr.ecr.<region>.amazonaws.com/your_service_name:latest
+        kubectl set image deployment/gateway-deployment gateway-container=767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
       env:
         KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        AWS_REGION: us-west-1
