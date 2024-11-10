@@ -10,6 +10,7 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Log.Information("Loading appsettings and gateway configs - App Gateway");
 //Load application settings
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -17,6 +18,7 @@ builder.Configuration
 
 // Add services to the container.
 
+Log.Information("Registering services - App Gateway");
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
