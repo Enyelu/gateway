@@ -58,18 +58,22 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: eu-west-1
 
-    # Step 8: Set correct Kubernetes context
-    - name: Set correct Kubernetes context
+    # Step 8: List all Kubernetes contexts to verify available contexts
+    - name: List Kubernetes Contexts
+      run: kubectl config get-contexts
+
+    # Step 9: Set correct Kubernetes context
+    - name: Set Kubernetes Context
       run: |
-        kubectl config use-context arn:aws:eks:eu-west-1:767397708304:cluster/doorapp
+        kubectl config use-context doorapp  # Use the correct context name
       env:
         KUBECONFIG: $HOME/.kube/config
 
-    # Step 9: Check current Kubernetes context
+    # Step 10: Check current Kubernetes context
     - name: Check Kubernetes context
       run: kubectl config current-context
 
-    # Step 10: Update Kubernetes deployment
+    # Step 11: Update Kubernetes deployment
     - name: Update Kubernetes deployment
       run: |
         kubectl set image deployment/gateway-deployment gateway-container=767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
