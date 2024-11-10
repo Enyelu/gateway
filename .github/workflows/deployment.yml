@@ -47,10 +47,19 @@ jobs:
         docker build -t 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest .
         docker push 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
 
-    # Update Kubernetes deployment
+  # Set up Kubeconfig for EKS
+    - name: Set up Kubeconfig for EKS
+      run: |
+          aws eks --region eu-west-1 update-kubeconfig --name doorapp
+      env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: eu-west-1
+
+  # Update Kubernetes deployment
     - name: Update Kubernetes deployment
       run: |
-        kubectl set image deployment/gateway-deployment gateway-container=767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
+          kubectl set image deployment/gateway-deployment gateway-container=767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
       env:
-        KUBECONFIG: ${{ secrets.KUBECONFIG }}
-        AWS_REGION: us-west-1
+          KUBECONFIG: $HOME/.kube/config
+          AWS_REGION: eu-west-1
