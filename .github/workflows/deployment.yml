@@ -32,7 +32,7 @@ jobs:
           dotnet test --filter TestCategory=Unit
         env:
           DOTNET_CLI_TELEMETRY_OPTOUT: 1
-          AWS_REGION: eu-west-1
+          # AWS_REGION: eu-west-1
 
       # Log in to Amazon ECR
       - name: Log in to Amazon ECR
@@ -51,22 +51,26 @@ jobs:
           aws eks --region eu-west-1 update-kubeconfig --name doorapp
 
       # Verify Kubernetes Context and Cluster Info
-      - name: Display Kubernetes Context
-        run: |
-          kubectl config get-contexts
-          kubectl config current-context
-          kubectl cluster-info
+      # - name: Display Kubernetes Context
+      #   run: |
+      #     kubectl config get-contexts
+      #     kubectl config current-context
+      #     kubectl cluster-info
 
-      # Set Kubernetes Context
-      - name: Set Kubernetes Context
+      # # Set Kubernetes Context
+      # - name: Set Kubernetes Context
+      #   run: |
+      #     kubectl config use-context arn:aws:eks:eu-west-1:767397708304:cluster/doorapp
+      #     kubectl config current-context
+
+      - name: apply kubernates yaml
         run: |
-          kubectl config use-context arn:aws:eks:eu-west-1:767397708304:cluster/doorapp
-          kubectl config current-context
+          kubectl apply -f kubdeployment.yml
 
       # Update Kubernetes deployment
       - name: Update Kubernetes deployment
         run: |
-          kubectl set image deployment/gateway-deployment gateway-container=767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
+          kubectl set image deployment/door-service-dateway door-service-dateway=767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
         env:
           KUBECONFIG: $HOME/.kube/config
           AWS_REGION: eu-west-1
