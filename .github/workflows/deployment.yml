@@ -18,7 +18,6 @@ jobs:
     # Unit Testing Step
     - name: Run Unit Tests
       run: |
-        # Example command for running unit tests with dotnet; modify for your specific test runner
         dotnet test --filter TestCategory=Unit
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -27,7 +26,6 @@ jobs:
     # Integration Testing Step
     - name: Run Integration Tests
       run: |
-        # Example command for running integration tests with dotnet; modify for your specific test runner
         dotnet test --filter TestCategory=Integration
       env:
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -47,19 +45,19 @@ jobs:
         docker build -t 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest .
         docker push 767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
 
-  # Set up Kubeconfig for EKS
+    # Set up Kubeconfig for EKS
     - name: Set up Kubeconfig for EKS
       run: |
-          aws eks --region eu-west-1 update-kubeconfig --name doorapp
+        aws eks --region eu-west-1 update-kubeconfig --name doorapp
       env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: eu-west-1
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: eu-west-1
 
-  # Update Kubernetes deployment
+    # Update Kubernetes deployment
     - name: Update Kubernetes deployment
       run: |
-          kubectl set image deployment/gateway-deployment gateway-container=767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
+        kubectl set image deployment/gateway-deployment gateway-container=767397708304.dkr.ecr.eu-west-1.amazonaws.com/doorapp/gateway:latest
       env:
-          KUBECONFIG: $HOME/.kube/config
-          AWS_REGION: eu-west-1
+        KUBECONFIG: $HOME/.kube/config
+        AWS_REGION: eu-west-1
